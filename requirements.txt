@@ -1,1 +1,6 @@
 Flask==2.3.3
+kserve~=0.12.1
+torchvision==0.15.1
+torch==2.0.0
+pillow~=10.2.0
+
