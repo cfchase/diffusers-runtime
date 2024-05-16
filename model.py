@@ -2,9 +2,7 @@ import os
 import io
 import base64
 import argparse
-from PIL import Image
 
-from kserve.protocol.rest.v2_datamodels import GenerateRequest
 from typing import Dict, Union
 import torch
 from diffusers import DiffusionPipeline
@@ -14,25 +12,23 @@ from kserve import (
     ModelServer,
     model_server,
     InferRequest,
-    InferOutput,
     InferResponse,
 )
 from kserve.errors import InvalidInput
-from kserve.utils.utils import generate_uuid
 
-MODEL_ID = os.environ.get("MODEL_ID", default="stabilityai/stable-diffusion-2-1")
-REFINER_ID = os.environ.get("REFINER_MODEL_ID", default="")
 
 class DiffusersModel(Model):
     def __init__(self, name: str):
         super().__init__(name)
+        self.model_id = os.environ.get("MODEL_ID", default="/mnt/models")
         self.pipeline = None
         self.refiner = None
         self.ready = False
         self.load()
 
     def load(self):
-        pipeline = DiffusionPipeline.from_pretrained(MODEL_ID)
+
+        pipeline = DiffusionPipeline.from_pretrained(self.model_id)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         pipeline.to(device)
         self.pipeline = pipeline
@@ -65,7 +61,7 @@ class DiffusersModel(Model):
         return {
             "predictions": [
                 {
-                    "model_name": MODEL_ID,
+                    "model_name": self.model_id,
                     "prompt": payload["prompt"],
                     "image": {
                         "format": "PNG",

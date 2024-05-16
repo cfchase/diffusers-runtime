@@ -19,6 +19,9 @@ spec:
             cpu: '4'
             memory: 8Gi
             nvidia.com/gpu: 1
+        env:
+          - name: MODEL_ID
+            value: 'stabilityai/stable-diffusion-2-1'
     tolerations:
       - key: nvidia.com/gpu
         operator: Exists
