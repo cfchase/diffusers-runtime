@@ -44,43 +44,35 @@ class DiffusersModel(Model):
             self, payload: Union[Dict, InferRequest], headers: Dict[str, str] = None
     ) -> Dict:
         if isinstance(payload, Dict) and "instances" in payload:
-            # print("preprocess v1")
             headers["request-type"] = "v1"
         elif isinstance(payload, InferRequest):
-            print("preprocess v2")
+            raise InvalidInput("v2 protocol not implemented")
         else:
             raise InvalidInput("invalid payload")
-        return {"prompt": payload["instances"][0]["prompt"]}
+
+        return payload["instances"][0]
 
     def predict(
             self, payload: Union[Dict, InferRequest], headers: Dict[str, str] = None
     ) -> Union[Dict, InferResponse]:
-        image = self.pipeline(payload["prompt"]).images[0]
-        # image = Image.open(".ignore/img.png")
+        image = self.pipeline(**payload).images[0]
         image_bytes = io.BytesIO()
         image.save(image_bytes, format='PNG')
         image_bytes.seek(0)
 
         im_b64 = base64.b64encode(image_bytes.read())
 
-        if "request-type" in headers and headers["request-type"] == "v1":
-            return {
-                "predictions": [
-                    {
-                        "model_name": MODEL_ID,
-                        "prompt": payload["prompt"],
-                        "image": {
-                            "format": "PNG",
-                            "b64": im_b64
-                        }
+        return {
+            "predictions": [
+                {
+                    "model_name": MODEL_ID,
+                    "prompt": payload["prompt"],
+                    "image": {
+                        "format": "PNG",
+                        "b64": im_b64
                     }
-                ]}
-        else:
-            return {
-                "model_name": MODEL_ID,
-                "id": "id",
-                "outputs": []
-            }
+                }
+            ]}
 
 
 parser = argparse.ArgumentParser(parents=[model_server.parser])
