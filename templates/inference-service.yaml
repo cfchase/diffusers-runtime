@@ -10,3 +10,17 @@ spec:
       - name: kserve-container
         image: quay.io/cfchase/diffusers-runtime:latest
         imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: '14'
+            memory: 24Gi
+            nvidia.com/gpu: 1
+          requests:
+            cpu: '4'
+            memory: 8Gi
+            nvidia.com/gpu: 1
+    tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+

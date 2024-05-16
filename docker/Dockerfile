@@ -1,6 +1,6 @@
-FROM registry.access.redhat.com/ubi9/python-39:1-117.1684741281
+FROM registry.access.redhat.com/ubi9/python-311:1-62
 
-# By default, listen on port 8081
+# By default, listen on port 8080
 EXPOSE 8080/tcp
 ENV FLASK_PORT=8080
 
